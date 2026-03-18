@@ -167,7 +167,7 @@ const SimpleARModelViewer = forwardRef(({
       
       <model-viewer
         ref={modelViewerRef}
-        src={modelSrc}
+        src={modelSrc ? encodeURI(modelSrc) : ''}
         alt={`3D ${dishName} Model`}
         camera-controls
         interaction-policy="always-allow"
@@ -179,7 +179,7 @@ const SimpleARModelViewer = forwardRef(({
         rotation-per-second="30deg"
         ar
         ar-modes="scene-viewer webxr quick-look"
-        ar-scale="fixed"
+        ar-scale="auto"
         ar-placement="floor"
         loading="eager"
         reveal="auto"
