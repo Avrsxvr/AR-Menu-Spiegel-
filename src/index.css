@@ -1,0 +1,422 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Lenis Smooth Scroll CSS */
+html.lenis {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+:root {
+  --bg: #0f0f0f;
+  --card-bg: #1a1a1a;
+  --accent: #DC2626;
+  --accent-hover: #B91C1C;
+  --text-primary: #ffffff;
+  --text-secondary: #a3a3a3;
+  --text-muted: #737373;
+  --border: #262626;
+  --radius: 16px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+  /* Optimized for smooth scrolling */
+  scroll-behavior: auto;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #404040;
+}
+
+/* Focus styles */
+.focus-visible:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Animation classes */
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Skeleton loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--card-bg) 25%, #262626 50%, var(--card-bg) 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+/* Touch improvements - removed hover lift effect */
+
+/* Allow model-viewer to display properly */
+model-viewer {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Hide model-viewer branding logo but keep AR button functionality */
+model-viewer > .icon,
+model-viewer::part(default-ar-button),
+model-viewer .annotation-wrapper,
+model-viewer .default-progress-bar,
+model-viewer .pan-target,
+model-viewer .controls,
+model-viewer .Hotspot,
+model-viewer > div:not([slot]):not(.ar-button):not([class*="ar"]),
+model-viewer > button:not([slot="ar-button"]):not([class*="ar"]) {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Keep only AR button visible */
+model-viewer button[slot="ar-button"],
+model-viewer .ar-button {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Scroll-Optimized 3D Performance */
+.model-container {
+  /* Only promote to GPU when model is loaded */
+  contain: layout style;
+  isolation: isolate;
+}
+
+.model-container.model-loaded {
+  /* Hardware acceleration only for loaded models */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.model-container model-viewer {
+  /* Minimize GPU layers during scroll */
+  will-change: auto;
+  contain: layout style;
+  /* Enable GPU only when interacting */
+  transition: transform 0.1s ease-out;
+}
+
+.model-container model-viewer:focus,
+.model-container model-viewer.ar-active {
+  /* Full GPU acceleration for interactions */
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Mobile Performance Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .model-container model-viewer {
+    --progress-bar-color: transparent;
+    /* Minimize GPU usage on mobile during scroll */
+    will-change: auto;
+  }
+  
+  .model-container model-viewer.ar-ready {
+    /* Only promote AR-ready models to GPU on mobile */
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  /* Reduce scroll jank on mobile */
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Optimize for lower-end devices */
+@media (max-device-pixel-ratio: 1.5) {
+  .model-container model-viewer {
+    /* Lower quality settings for low-DPI devices */
+    --progress-bar-height: 2px;
+  }
+}
+
+/* Memory management for multiple models */
+.dish-grid {
+  /* Contain layout to improve performance with many elements */
+  contain: layout;
+}
+
+/* Performance optimization for bounce rate reduction */
+/* Critical above-the-fold content */
+.critical-content {
+  /* Prioritize rendering of critical content */
+  contain: layout style paint;
+  will-change: auto;
+}
+
+/* Progressive enhancement */
+@supports not (display: grid) {
+  .dish-grid {
+    /* Fallback for older browsers */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+}
+
+/* Reduce layout shifts */
+.skeleton-card,
+.dish-card {
+  /* Fixed aspect ratios prevent layout shifts */
+  aspect-ratio: 1 / 1.4;
+  min-height: 480px;
+}
+
+/* Performance-conscious animations */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Emergency fallback styles */
+.emergency-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Critical resource hints */
+.model-container::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+              linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+              linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+              linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.model-container.loading::before {
+  opacity: 0.1;
+}
+
+/* Crash Prevention & Performance Optimization */
+.emergency-mode * {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+.reduced-animations * {
+  animation-duration: 0.3s !important;
+  transition-duration: 0.3s !important;
+}
+
+.no-animations * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Performance-optimized model loading */
+.model-container {
+  contain: layout style paint;
+  will-change: auto;
+}
+
+.model-container.loading {
+  contain: strict;
+}
+
+.model-container model-viewer {
+  contain: layout style paint;
+}
+
+/* Bounce rate optimization - engagement tracking */
+[data-track] {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+/* Ensure cards are not interactive */
+article {
+  cursor: default !important;
+  transform: none !important;
+  transition: none !important;
+  pointer-events: auto;
+}
+
+article:active {
+  transform: none !important;
+}
+
+/* Only buttons should be clickable */
+button {
+  cursor: pointer !important;
+}
+
+/* Warning animations */
+@keyframes slideDown {
+  from {
+    transform: translateX(-50%) translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Spinner animation for bounce rate optimizer */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Memory pressure indicators */
+.memory-warning {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 107, 107, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  z-index: 9999;
+  backdrop-filter: blur(10px);
+}
+
+/* Device-specific optimizations */
+@media (max-width: 768px) {
+  .model-container {
+    contain: layout style;
+  }
+  
+  /* Reduce animations on mobile for better performance */
+  * {
+    animation-duration: 0.3s !important;
+    transition-duration: 0.3s !important;
+  }
+}
+
+/* Low-end device optimizations */
+@media (max-width: 480px) {
+  .model-container model-viewer {
+    --poster-color: transparent;
+    --progress-bar-color: #007bff;
+    --progress-bar-height: 2px;
+  }
+  
+  /* Disable shadows and complex effects on very low-end devices */
+  .emergency-mode model-viewer {
+    --environment-image: none;
+    --skybox-image: none;
+    shadow-intensity: 0;
+  }
+}
+
+/* Prefers reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .lenis {
+    scroll-behavior: auto !important;
+  }
+}

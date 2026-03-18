@@ -1,0 +1,145 @@
+[
+  {
+    "id": "bong-kebab",
+    "name": "Bong Kebab",
+    "description": "Tender boneless chicken pieces cooked in tandoor using khoya and jaggery marination, served with a jaggery glaze.",
+    "category": "Appetizers",
+    "meta": "4 pcs • Serves 1 • Medium Hot 🌶️",
+    "price": 350,
+    "type": "non-veg",
+    "image": "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&h=300&fit=crop&crop=center",
+    "modelUrl": "/Models/Bong Kebab.glb"
+  },
+  {
+    "id": "Phool-til-posto",
+    "name": "Phool-Til Posto",
+    "description": "Cauliflower florets charred to perfection served on a bed of rich sesame and poppy seeds gravy and a ghee-crusted paratha.",
+    "category": "Appetizers",
+    "meta": "Serves 2 • Mild Hot 🌶️",
+    "price": 270,
+    "type": "veg",
+    "image": "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&h=300&fit=crop&crop=center",
+    "modelUrl": "/Models/Fool_Til_Posto.glb"
+  },
+  {
+    "id": "nonibahar-redefined",
+    "name": "Nonibahar Redefined",
+    "description": "Kolkata Bhetki with roasted coconut crust served with a buttery white gravy.",
+    "category": "Appetizers",
+    "meta": "Serves 1 • Medium Hot 🌶️",
+    "price": 390,
+    "type": "non-veg",
+    "image": "https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=400&h=300&fit=crop&crop=center",
+    "modelUrl": "/Models/Nonibahar redefined.glb"
+  },
+  {
+    "id": "aamchur-golda",
+    "name": "Aamchur Golda",
+    "description": "Grilled scampi with a secret marination and dry mango dust served with spherified pearls.",
+    "category": "Appetizers",
+    "meta": "4 pcs • Serves 1 • High Hot 🌶️🌶️",
+    "price": 390,
+    "type": "non-veg",
+    "image": "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop&crop=center",
+    "modelUrl": "/Models/Aamchur Golda.glb"
+  },
+  {
+    "id": "jhuri-mourola",
+    "name": "Jhuri Mourola",
+    "description": "Crispy mourala served with a dip of your choice.",
+    "category": "Appetizers",
+    "meta": "6 pcs • Serves 2 • Medium Hot 🌶️",
+    "price": 130,
+    "type": "non-veg",
+    "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop&crop=center",
+    "modelUrl": "/Models/Jhuri_Mourola.glb"
+  },
+  {
+    "id": "til-aamra-murgi",
+    "name": "Til Aamra Murgi",
+    "description": "Chicken cooked in black sesame and hog plum paste, served with a hog plum-chilli flakes relish.",
+    "category": "Main Course",
+    "meta": "Serves 2 • Medium Hot 🌶️",
+    "price": 295,
+    "type": "non-veg",
+    "image": "https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=400&h=300&fit=crop&crop=center",
+    "modelUrl": "/Models/Til Amra Murgi.glb"
+  },
+  {
+    "id": "gorgora",
+    "name": "Gorgora",
+    "description": "Slow-cooked mutton in an old Bengali style gravy and birista.",
+    "category": "Main Course",
+    "meta": "Serves 2 • High Hot 🌶️🌶️",
+    "price": 450,
+    "type": "non-veg",
+    "image": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=300&fit=crop&crop=center",
+    "modelUrl": "/Models/Gorgora.glb"
+  },
+  {
+    "id": "golda-amok",
+    "name": "Golda Amok",
+    "description": "Scampi served in a Cambodian amok gravy.",
+    "category": "Main Course",
+    "meta": "Serves 2 • Medium Hot 🌶️",
+    "price": 390,
+    "type": "non-veg",
+    "image": "https://images.unsplash.com/photo-1631709497146-d4782b17ee3e?w=400&h=300&fit=crop&crop=center",
+    "modelUrl": "/Models/Golda_Amok.glb"
+  },
+  {
+    "id": "bhaja-twist",
+    "name": "Bhaja Twist",
+    "description": "Fish fry served with a caramelized onion gravy and spherified pearls.",
+    "category": "Main Course",
+    "meta": "Serves 2 • Medium Hot 🌶️",
+    "price": 220,
+    "type": "non-veg",
+    "image": "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&h=300&fit=crop&crop=center",
+    "modelUrl": "/Models/Bhaja twist.glb"
+  },
+  {
+    "id": "kachhi-mirchi",
+    "name": "Kachhi Mirchi",
+    "description": "Chicken liver and gizzard tossed in a hot wok with a secret marination and fiery dalle sauce and pickled dalle chillies.",
+    "category": "Main Course",
+    "meta": "Serves 2 • Very Hot 🌶️🌶️🌶️",
+    "price": 210,
+    "type": "non-veg",
+    "image": "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&h=300&fit=crop&crop=center",
+    "modelUrl": "/Models/Kachhi Mirchi.glb"
+  },
+  {
+    "id": "kolkata-yakhni-polao",
+    "name": "Kolkata Yakhni Polao",
+    "description": "Long-grain rice slow-cooked in a flavorful protein stock.",
+    "category": "Rice & Polao",
+    "meta": "Serves 1 • Medium Hot 🌶️",
+    "price": 375,
+    "type": "non-veg",
+    "image": "https://images.unsplash.com/photo-1563379091339-03246963d9d7?w=400&h=300&fit=crop&crop=center",
+    "modelUrl": ""
+  },
+  {
+    "id": "anarosh-sona-moong",
+    "name": "Anarosh Sona Moong",
+    "description": "Bengali dal cooked with sweet and tangy pineapple.",
+    "category": "Main Course",
+    "meta": "Serves 2 • Mild Hot 🌶️",
+    "price": 180,
+    "type": "veg",
+    "image": "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&h=300&fit=crop&crop=center",
+    "modelUrl": "/Models/Anarosh Sona Moong.glb"
+  },
+  {
+    "id": "mollar-chowk-doi-biski",
+    "name": "Mollar Chowk Doi with Biski",
+    "description": "Misti doi with a mishti crumble.",
+    "category": "Desserts",
+    "meta": "Serves 2 • Sweet",
+    "price": 145,
+    "type": "veg",
+    "image": "https://images.unsplash.com/photo-1571167489217-33e4be702324?w=400&h=300&fit=crop&crop=center",
+    "modelUrl": "/Models/mollar chowk doi with Biski.glb"
+  }
+]
