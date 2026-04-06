@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Spiegel AR – View on Table</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- 8th Wall Engine Stack (self-hosted) -->
+  <script src="/8thwall/scripts/8frame-1.5.0.min.js"></script>
+  <script src="/8thwall/xrextras/xrextras.js"></script>
+  <script src="/8thwall/landing-page/landing-page.js"></script>
+  <script src="/8thwall/xr/xr.js" async data-preload-chunks="slam"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Top bar overlay ───────────────────────────────── */
+    .ar-ui-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 999;
+      pointer-events: none;
+      padding: 16px;
+      padding-top: max(16px, env(safe-area-inset-top));
+    }
+
+    .ar-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: auto;
+    }
+
+    .ar-back-btn {
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .ar-back-btn:active {
+      background: rgba(0, 0, 0, 0.75);
+    }
+
+    .ar-dish-badge {
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border-radius: 24px;
+      padding: 8px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      max-width: 60%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Tap prompt ────────────────────────────────────── */
+    .ar-prompt {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-radius: 28px;
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 500;
+      z-index: 999;
+      white-space: nowrap;
+      animation: promptPulse 2.5s ease-in-out infinite;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .ar-prompt.hidden {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px);
+      pointer-events: none;
+    }
+
+    @keyframes promptPulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.55;
+      }
+    }
+
+    /* ── Bottom action bar ─────────────────────────────── */
+    .ar-bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 999;
+      padding: 16px;
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .ar-bottom-bar.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .ar-action-btn {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border-radius: 16px;
+      padding: 14px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+
+    .ar-action-btn:active {
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .ar-action-btn.danger {
+      background: rgba(239, 68, 68, 0.75);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .ar-action-btn.danger:active {
+      background: rgba(239, 68, 68, 0.95);
+    }
+
+    /* ── Error panel ───────────────────────────────────── */
+    .ar-error-panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .ar-error-panel.visible {
+      display: flex;
+    }
+
+    .ar-error-card {
+      background: rgba(30, 30, 30, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px 32px;
+      text-align: center;
+      max-width: 320px;
+      width: 90%;
+    }
+
+    .ar-error-card .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .ar-error-card h2 {
+      color: #fff;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .ar-error-card p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .ar-error-card button {
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 32px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .ar-error-card button:active {
+      background: #dc2626;
+    }
+
+    /* ── Placed feedback ───────────────────────────────── */
+    .ar-placed-toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(34, 197, 94, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #fff;
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .ar-placed-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Desktop Preview Styles ────────────────────────── */
+    #desktop-env {
+      display: none;
+    }
+
+    body.display-desktop-env #desktop-env {
+      display: block;
+    }
+  </style>
+</head>
+
+<body class="loading">
+
+
+  <!-- ── UI Overlay ──────────────────────────────────── -->
+  <div class="ar-ui-overlay">
+    <div class="ar-top-bar">
+      <button class="ar-back-btn" id="backBtn" aria-label="Go back">✕</button>
+      <div class="ar-dish-badge" id="dishBadge">Loading…</div>
+    </div>
+  </div>
+
+  <div class="ar-prompt" id="promptText">👆 Tap a surface to place the dish</div>
+
+  <div class="ar-placed-toast" id="placedToast">✓ Placed! Tap again to reposition</div>
+
+  <div class="ar-bottom-bar" id="bottomBar">
+    <button class="ar-action-btn danger" id="resetBtn">
+      <span>↻</span> Reset
+    </button>
+    <button class="ar-action-btn" id="doneBtn">
+      <span>✓</span> Done
+    </button>
+  </div>
+
+  <!-- ── Error panel ─────────────────────────────────── -->
+  <div class="ar-error-panel" id="errorPanel">
+    <div class="ar-error-card">
+      <div class="icon">⚠️</div>
+      <h2>No Model Available</h2>
+      <p>This dish doesn't have a 3D model yet. Please go back and try another dish.</p>
+      <button onclick="window.history.back()">Go Back</button>
+    </div>
+  </div>
+
+  <!-- ── Component registration (MUST be before <a-scene>) ── -->
+  <script>
+    // ── Read query params ──────────────────────────────
+    var params = new URLSearchParams(window.location.search);
+    var modelUrl = params.get('model') || '';
+    var dishName = params.get('name') || 'Dish';
+
+    // Set badge text
+    document.getElementById('dishBadge').textContent = dishName;
+
+    // Show error if no model
+    if (!modelUrl) {
+      document.getElementById('errorPanel').classList.add('visible');
+      document.getElementById('promptText').classList.add('hidden');
+    }
+
+    // Detect if on Desktop for visual preview
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (!isMobile) {
+      document.body.classList.add('display-desktop-env');
+    }
+
+    // ── Back / Done buttons ────────────────────────────
+    document.getElementById('backBtn').addEventListener('click', function () {
+      window.history.back();
+    });
+    document.getElementById('doneBtn').addEventListener('click', function () {
+      window.history.back();
+    });
+
+    // ── Helper: show toast ─────────────────────────────
+    function showPlacedToast() {
+      var toast = document.getElementById('placedToast');
+      toast.classList.add('show');
+      setTimeout(function () {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // ── Register A-Frame component: tap-place-dish ─────
+    AFRAME.registerComponent('tap-place-dish', {
+      init: function () {
+        var self = this;
+        var ground = document.getElementById('ground');
+        var prompt = document.getElementById('promptText');
+        var bottomBar = document.getElementById('bottomBar');
+        var resetBtn = document.getElementById('resetBtn');
+        var currentModel = null;
+        var isModelLoading = false;
+
+        ground.addEventListener('click', function (event) {
+          if (!modelUrl || isModelLoading) return;
+
+          var touchPoint = event.detail.intersection.point;
+
+          // ── Already placed → reposition ──────────────
+          if (currentModel) {
+            currentModel.setAttribute('position', touchPoint);
+            showPlacedToast();
+            return;
+          }
+
+          // ── First tap → spawn model ──────────────────
+          isModelLoading = true;
+          prompt.classList.add('hidden');
+
+          var el = document.createElement('a-entity');
+          el.setAttribute('position', touchPoint);
+          el.setAttribute('visible', 'false');
+          el.setAttribute('scale', '0.0001 0.0001 0.0001');
+          el.setAttribute('shadow', 'receive: false');
+
+          // Enable gestures on this new model
+          el.classList.add('cantap');
+          el.setAttribute('xrextras-two-finger-rotate', '');
+          el.setAttribute('xrextras-pinch-scale', '');
+          el.setAttribute('xrextras-hold-drag', '');
+
+          // Use the model URL directly (encodeURI handles spaces)
+          el.setAttribute('gltf-model', encodeURI(modelUrl));
+
+          self.el.sceneEl.appendChild(el);
+          currentModel = el;
+
+          el.addEventListener('model-loaded', function () {
+            isModelLoading = false;
+
+            // ── Auto-scale to real-world plate size (~22 cm) ──────
+            // Use el.object3D to ensure we capture all child meshes, not just the root
+            var box = new THREE.Box3().setFromObject(el.object3D);
+            var size = new THREE.Vector3();
+            box.getSize(size);
+            
+            var scaleFactor = 1;
+            // Get the absolute maximum dimension (just in case x/z are reported as 0)
+            var maxDim = Math.max(size.x, size.y, size.z);
+            
+            if (maxDim > 0.001) {
+              var targetSize = 0.22; // 22 centimeters
+              scaleFactor = targetSize / maxDim;
+            } else {
+              // Fallback if model bounding box is completely broken or empty
+              scaleFactor = 0.1;
+            }
+
+            // Centre model above ground
+            var center = new THREE.Vector3();
+            box.getCenter(center);
+            var yOffset = (-box.min.y) * scaleFactor;
+            var pos = el.getAttribute('position');
+            el.setAttribute('position', {
+              x: pos.x,
+              y: pos.y + yOffset,
+              z: pos.z
+            });
+
+            el.setAttribute('visible', 'true');
+            el.setAttribute('animation', {
+              property: 'scale',
+              to: scaleFactor + ' ' + scaleFactor + ' ' + scaleFactor,
+              easing: 'easeOutElastic',
+              dur: 800,
+            });
+
+            // Show bottom bar & toast
+            bottomBar.classList.add('visible');
+            showPlacedToast();
+          });
+        });
+
+        // ── Reset button ───────────────────────────────
+        resetBtn.addEventListener('click', function () {
+          if (currentModel) {
+            currentModel.parentNode.removeChild(currentModel);
+            currentModel = null;
+            isModelLoading = false;
+            prompt.classList.remove('hidden');
+            bottomBar.classList.remove('visible');
+          }
+        });
+      }
+    });
+  </script>
+
+  <!-- ── A-Frame scene with 8th Wall world tracking ──── -->
+  <a-scene
+    tap-place-dish
+    landing-page
+    xrextras-loading
+    xrextras-runtime-error
+    xrextras-gesture-detector
+    renderer="colorManagement: true"
+    xrweb="allowedDevices: any">
+
+    <!-- Camera + raycaster -->
+    <a-camera
+      id="camera"
+      position="0 8 8"
+      raycaster="objects: .cantap"
+      cursor="fuse: false; rayOrigin: mouse;">
+    </a-camera>
+
+    <!-- Directional light (follows camera) -->
+    <a-entity
+      light="
+        type: directional;
+        intensity: 0.8;
+        castShadow: true;
+        shadowMapHeight: 2048;
+        shadowMapWidth: 2048;
+        shadowCameraTop: 20;
+        shadowCameraBottom: -20;
+        shadowCameraRight: 20;
+        shadowCameraLeft: -20;
+        target: #camera"
+      xrextras-attach="target: camera; offset: 4 10 3"
+      position="1 4.3 2.5"
+      shadow>
+    </a-entity>
+
+    <a-light type="ambient" intensity="0.6"></a-light>
+
+    <!-- Desktop Preview Environment (Only visible on Windows/Mac) -->
+    <a-entity id="desktop-env">
+      <a-sky color="#1a1a1a"></a-sky>
+      <!-- Visual ground for desktop testing -->
+      <a-circle
+        rotation="-90 0 0"
+        radius="100"
+        color="#333"
+        metalness="0"
+        roughness="1"
+      ></a-circle>
+    </a-entity>
+
+    <!-- Invisible ground plane for tap raycasting -->
+    <a-box
+      id="ground"
+      class="cantap"
+      scale="1000 0.01 1000"
+      position="0 0 0"
+      material="shader: shadow; transparent: true; opacity: 0.4"
+      shadow>
+    </a-box>
+
+  </a-scene>
+
+
+</body>
+
+</html>

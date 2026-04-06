@@ -101,7 +101,6 @@ const ModelPlaceholderModal = ({ isOpen, onClose, dish, viewType }) => {
             <SimpleARModelViewer
               modelSrc={dish?.modelUrl || '/models/default-dish.glb'}
               dishName={dish?.name || 'Dish'}
-              showARButton={isARView}
               className="rounded-xl"
             />
           </div>

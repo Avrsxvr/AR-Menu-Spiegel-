@@ -22,6 +22,7 @@ function App() {
     dish: null,
     viewType: null
   });
+  const [activeModelId, setActiveModelId] = useState(null);
   const [adaptiveSettings, setAdaptiveSettings] = useState(null);
   
   const lenisRef = useRef(null);
@@ -239,6 +240,8 @@ function App() {
                     dish={dish}
                     onViewModal={handleViewModal}
                     adaptiveSettings={adaptiveSettings}
+                    activeModelId={activeModelId}
+                    onActivateModel={setActiveModelId}
                   />
                 </ProgressiveLoader>
               ))}
