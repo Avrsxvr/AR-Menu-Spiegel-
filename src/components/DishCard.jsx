@@ -2,7 +2,7 @@ import React from 'react';
 import SimpleARModelViewer from './SimpleARModelViewer';
 import VegNonVegBadge from './VegNonVegBadge';
 
-const DishCard = ({ dish, onViewModal, adaptiveSettings, activeModelId, onActivateModel }) => {
+const DishCard = ({ dish, onViewModal, adaptiveSettings, activeModelId, onActivateModel, onNavigateAR }) => {
   const isModelActive = activeModelId === dish.id;
 
   const handlePreviewTap = (e) => {
@@ -27,6 +27,8 @@ const DishCard = ({ dish, onViewModal, adaptiveSettings, activeModelId, onActiva
       alert('AR model is not available for this dish yet.');
       return;
     }
+
+    if (onNavigateAR) onNavigateAR();
 
     const arPageUrl =
       '/ar.html?model=' +

@@ -24,6 +24,31 @@ function App() {
   });
   const [activeModelId, setActiveModelId] = useState(null);
   const [adaptiveSettings, setAdaptiveSettings] = useState(null);
+
+  // Restore state from sessionStorage on mount
+  useEffect(() => {
+    const savedState = sessionStorage.getItem('spiegel_menu_state');
+    if (savedState) {
+      try {
+        const { category, search, scrollY } = JSON.parse(savedState);
+        setActiveCategory(category || 'All');
+        setSearchTerm(search || '');
+        // We'll handle scroll after dishes load
+        window._initialScrollY = scrollY;
+      } catch (e) {
+        console.error('Failed to restore state', e);
+      }
+    }
+  }, []);
+
+  // Save state before navigating away
+  const saveMenuState = () => {
+    sessionStorage.setItem('spiegel_menu_state', JSON.stringify({
+      category: activeCategory,
+      search: searchTerm,
+      scrollY: window.scrollY
+    }));
+  };
   
   const lenisRef = useRef(null);
 
@@ -99,6 +124,14 @@ function App() {
         const response = await fetch('/dishes.json');
         const data = await response.json();
         setDishes(data);
+        
+        // Restore scroll position after dishes are rendered
+        if (window._initialScrollY) {
+          setTimeout(() => {
+            window.scrollTo({ top: window._initialScrollY, behavior: 'instant' });
+            window._initialScrollY = null;
+          }, 100);
+        }
         
         // 🧊 Expert Optimization: Silent Background Warm-up for AR
         if (data && data.length > 0) {
@@ -261,6 +294,7 @@ function App() {
                     adaptiveSettings={adaptiveSettings}
                     activeModelId={activeModelId}
                     onActivateModel={setActiveModelId}
+                    onNavigateAR={saveMenuState}
                   />
                 </ProgressiveLoader>
               ))}

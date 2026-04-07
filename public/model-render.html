@@ -9,8 +9,8 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      width: 800px;
-      height: 600px;
+      width: 100vw;
+      height: 100vh;
       overflow: hidden;
       background: #1a1a1a;
       display: flex;
@@ -34,29 +34,41 @@
       background: rgba(0,0,0,0.7);
       padding: 8px 12px;
       border-radius: 6px;
+      display: none; /* Hidden for fallback use */
+    }
+    .back-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 20px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
   </style>
 </head>
 <body>
   <div id="status">Waiting for model...</div>
+  <button class="back-btn" onclick="window.history.back()">Back to Menu</button>
 
   <model-viewer
     id="viewer"
     camera-controls
-    interaction-prompt="none"
+    interaction-prompt="auto"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
     auto-rotate
-    auto-rotate-delay="0"
-    rotation-per-second="0deg"
-    bounds="tight"
-    camera-target="auto auto auto"
-    camera-orbit="0deg 75deg auto"
-    shadow-intensity="0.5"
-    shadow-softness="1"
-    tone-mapping="neutral"
-    environment-image="neutral"
-    exposure="0.8"
-    reveal="auto"
-    style="width:800px;height:600px;background:#2a2a2a;"
+    auto-rotate-delay="1000"
+    shadow-intensity="1"
+    shadow-softness="0.8"
+    exposure="1.2"
+    ar-scale="auto"
+    style="width:100vw; height:100vh;"
   ></model-viewer>
 
   <script>

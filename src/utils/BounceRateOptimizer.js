@@ -218,10 +218,12 @@ class BounceRateOptimizer {
     const sendBounceData = () => {
       const bounceData = this.calculateBounceMetrics();
       
-      // Send beacon data
+      // Send beacon data (Disabled for static environments to prevent 404s)
+      /*
       if (navigator.sendBeacon) {
         navigator.sendBeacon('/api/bounce-metrics', JSON.stringify(bounceData));
       }
+      */
       
       // Also send to analytics
       if (window.gtag) {
