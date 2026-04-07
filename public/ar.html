@@ -364,7 +364,7 @@
 
   <div class="ar-prompt" id="promptText">👆 Tap a surface to place the dish</div>
 
-  <div class="ar-placed-toast" id="placedToast">✓ Placed! Walk around to view from all angles</div>
+  <div class="ar-placed-toast" id="placedToast">✓ Placed! Drag to move, pinch to scale</div>
 
   <div class="ar-bottom-bar" id="bottomBar">
     <button class="ar-action-btn danger" id="resetBtn">
@@ -491,9 +491,10 @@
           wrapper.setAttribute('position', touchPoint);
           wrapper.classList.add('cantap');
           
-          // Only allow scale and rotate — NO hold-drag so model stays spatially locked
           wrapper.setAttribute('xrextras-two-finger-rotate', '');
           wrapper.setAttribute('xrextras-pinch-scale', 'min: 0.1; max: 8.0');
+          // Adding hold-drag specifically anchors the model to the real SLAM tracked surface geometry
+          wrapper.setAttribute('xrextras-hold-drag', '');
 
           // ── Create Inner Entity (Handles geometry and scaling math) ──
           var el = document.createElement('a-entity');
@@ -520,7 +521,8 @@
             var maxDim = Math.max(size.x, size.y, size.z);
 
             if (maxDim > 0.001) {
-              var targetSize = 1.25;
+              // Increased target size by 1.5x (1.25 * 1.5 = 1.875)
+              var targetSize = 1.875;
               scaleFactor = targetSize / maxDim;
             } else {
               scaleFactor = 0.01;
