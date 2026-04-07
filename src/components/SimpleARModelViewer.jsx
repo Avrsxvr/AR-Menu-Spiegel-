@@ -110,17 +110,27 @@ const SimpleARModelViewer = ({
             right: 0,
             bottom: 0,
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
             color: '#ffffff',
-            fontSize: '14px',
-            fontWeight: '500',
             zIndex: 10,
-            borderRadius: '12px'
+            borderRadius: '16px'
           }}
         >
-          Loading model…
+          <div className="spiegel-spinner-mini" style={{
+            width: '24px',
+            height: '24px',
+            border: '3px solid rgba(255,255,255,0.1)',
+            borderLeftColor: '#ffffff',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+            marginBottom: '12px'
+          }}></div>
+          <span style={{ fontSize: '12px', fontWeight: '600', letterSpacing: '0.02em' }}>Loading 3D...</span>
         </div>
       )}
       

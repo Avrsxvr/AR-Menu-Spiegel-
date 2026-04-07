@@ -6,20 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Spiegel AR – View on Table</title>
   <link rel="icon" type="image/png" href="/fav.png" />
+  <link rel="preconnect" href="https://cdn.8thwall.com" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
   <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- 8th Wall Engine Stack -->
-  <!-- We use the CDN for the generic UI libraries to perfectly resolve all SVG/Font paths automatically -->
   <script src="//cdn.8thwall.com/web/aframe/8frame-1.5.0.min.js"></script>
   <script src="//cdn.8thwall.com/web/xrextras/xrextras.js"></script>
   <script src="//cdn.8thwall.com/web/landing-page/landing-page.js"></script>
   
-  <!-- Core SLAM Engine (Self-hosted to bypass domain/license locks) -->
-  <script src="/external/xr/xr.js" async data-preload-chunks="slam"></script>
+  <!-- Core SLAM Engine - High priority for faster camera opening -->
+  <script src="/external/xr/xr.js" async data-preload-chunks="slam" fetchpriority="high"></script>
 
   <style>
     * {
@@ -569,7 +569,7 @@
     xrextras-runtime-error
     xrextras-gesture-detector
     renderer="colorManagement: true"
-    xrweb="allowedDevices: any">
+    xrweb="allowedDevices: any; disableStandardSLAMIntro: true; skipAppIntro: true">
 
     <!-- Camera + raycaster -->
     <a-camera
