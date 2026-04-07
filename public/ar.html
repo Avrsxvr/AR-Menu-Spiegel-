@@ -474,8 +474,8 @@
             var maxDim = Math.max(size.x, size.y, size.z);
 
             if (maxDim > 0.001) {
-              // Increased initial placement size by 10x as requested (10 meters relative baseline)
-              var targetSize = 10.0;
+              // Normalized to 1.25m for the largest dimension (8x smaller than previous 10.0m)
+              var targetSize = 1.25;
               scaleFactor = targetSize / maxDim;
             } else {
               scaleFactor = 0.01; // safe tiny fallback
