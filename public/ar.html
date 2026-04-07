@@ -394,6 +394,29 @@
 
   <!-- ── Component registration (MUST be before <a-scene>) ── -->
   <script>
+    // ── More Aggressive Slam-Grid Killer ─────────────
+    AFRAME.registerComponent('slam-grid-killer', {
+      init: function() {
+        this.el.addEventListener('realityready', () => {
+          // Kill any slam-grid entity that might have been injected
+          const grids = document.querySelectorAll('[xrextras-slam-grid], #slam-grid, .xrextras-slam-grid');
+          grids.forEach(g => {
+            if (g.parentNode) g.parentNode.removeChild(g);
+          });
+          
+          // Also check for hidden entities in the scene tree
+          const scene = this.el.sceneEl;
+          if (scene && scene.object3D) {
+            scene.object3D.traverse((obj) => {
+              if (obj.name && obj.name.toLowerCase().includes('slam-grid')) {
+                obj.visible = false;
+              }
+            });
+          }
+        });
+      }
+    });
+
     // ── Hide Custom Loader when AR starts ──────────────
     document.addEventListener('DOMContentLoaded', function() {
       var sceneEl = document.querySelector('a-scene');
@@ -571,10 +594,11 @@
   <!-- ── A-Frame scene with 8th Wall world tracking ──── -->
   <a-scene
     tap-place-dish
+    slam-grid-killer
     xrextras-runtime-error
     xrextras-gesture-detector
     renderer="colorManagement: true"
-    xrweb="allowedDevices: any; disableStandardSLAMIntro: true; skipAppIntro: true">
+    xrweb="allowedDevices: any; disableStandardSLAMIntro: true; skipAppIntro: true; requestPresence: false">
 
     <!-- Camera + raycaster -->
     <a-camera
