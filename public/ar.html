@@ -308,11 +308,51 @@
       height: 0 !important;
       pointer-events: none !important;
     }
+    /* ── Custom Instant Loading UI ──────────────────────── */
+    .spiegel-loader-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #111111;
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s ease;
+    }
+    .spiegel-loader-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .spiegel-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-left-color: #ef4444; /* Spiegel Red */
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    .spiegel-loading-text {
+      color: #fff;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    @keyframes spin { 
+      0% { transform: rotate(0deg); } 
+      100% { transform: rotate(360deg); } 
+    }
   </style>
 </head>
 
 <body class="loading">
 
+  <!-- ── Custom Loading Overlay ─────────────────────── -->
+  <div id="spiegel-loader" class="spiegel-loader-overlay">
+    <div class="spiegel-spinner"></div>
+    <div class="spiegel-loading-text">Preparing AR Menu...</div>
+  </div>
 
   <!-- ── UI Overlay ──────────────────────────────────── -->
   <div class="ar-ui-overlay">
@@ -324,7 +364,7 @@
 
   <div class="ar-prompt" id="promptText">👆 Tap a surface to place the dish</div>
 
-  <div class="ar-placed-toast" id="placedToast">✓ Placed! Tap again to reposition</div>
+  <div class="ar-placed-toast" id="placedToast">✓ Placed! Walk around to view from all angles</div>
 
   <div class="ar-bottom-bar" id="bottomBar">
     <button class="ar-action-btn danger" id="resetBtn">
@@ -347,6 +387,20 @@
 
   <!-- ── Component registration (MUST be before <a-scene>) ── -->
   <script>
+    // ── Hide Custom Loader when AR starts ──────────────
+    document.addEventListener('DOMContentLoaded', function() {
+      var sceneEl = document.querySelector('a-scene');
+      if (sceneEl) {
+        sceneEl.addEventListener('realityready', function() {
+          var loader = document.getElementById('spiegel-loader');
+          if (loader) {
+            loader.classList.add('hidden');
+            setTimeout(function() { loader.remove(); }, 500);
+          }
+        });
+      }
+    });
+
     // ── Read query params ──────────────────────────────
     var params = new URLSearchParams(window.location.search);
     var modelUrl = params.get('model') || '';
@@ -423,70 +477,60 @@
 
           var touchPoint = event.detail.intersection.point;
 
-          // ── Already placed → reposition ──────────────
+          // ── Model already placed → it's locked, do nothing ──
           if (currentModel) {
-            currentModel.setAttribute('position', touchPoint);
-            showPlacedToast();
             return;
           }
 
-          // ── First tap → spawn model ──────────────────
+          // ── First tap → spawn model and lock it ─────────
           isModelLoading = true;
           prompt.classList.add('hidden');
 
-          // ── Create Wrapper Entity (Handles all touching/gestures) ──
+          // ── Create Wrapper Entity (Handles gestures) ──
           var wrapper = document.createElement('a-entity');
           wrapper.setAttribute('position', touchPoint);
-          wrapper.classList.add('cantap'); // MUST be on the wrapper so hold-drag catches the raycast!
+          wrapper.classList.add('cantap');
           
-          // Gesture components always operate on a clean 1.0 baseline
+          // Only allow scale and rotate — NO hold-drag so model stays spatially locked
           wrapper.setAttribute('xrextras-two-finger-rotate', '');
           wrapper.setAttribute('xrextras-pinch-scale', 'min: 0.1; max: 8.0');
-          wrapper.setAttribute('xrextras-hold-drag', '');
 
           // ── Create Inner Entity (Handles geometry and scaling math) ──
           var el = document.createElement('a-entity');
           el.setAttribute('shadow', 'receive: false');
-          el.setAttribute('scale', '1 1 1'); // start at 1 for measuring truly
+          el.setAttribute('scale', '1 1 1');
 
-          // Use the model URL directly (encodeURI handles spaces)
           el.setAttribute('gltf-model', encodeURI(modelUrl));
 
           wrapper.appendChild(el);
           self.el.sceneEl.appendChild(wrapper);
           
-          // Save wrapper to logic variables so Reset deletes both
           currentModel = wrapper;
 
           el.addEventListener('model-loaded', function () {
             isModelLoading = false;
 
-            // Ensure model is updated for measurement
             el.object3D.updateWorldMatrix(true, true);
             
-            // ── Measure REAL bounding box at scale 1 ──────
             var box = new THREE.Box3().setFromObject(el.object3D);
             var size = new THREE.Vector3();
             box.getSize(size);
 
             var scaleFactor = 1;
-            // Use the largest dimension to normalise
             var maxDim = Math.max(size.x, size.y, size.z);
 
             if (maxDim > 0.001) {
-              // Normalized to 1.25m for the largest dimension (8x smaller than previous 10.0m)
               var targetSize = 1.25;
               scaleFactor = targetSize / maxDim;
             } else {
-              scaleFactor = 0.01; // safe tiny fallback
+              scaleFactor = 0.01;
             }
 
-            // Centre model above ground locally inside the wrapper
-            // Add a 0.30 offset (30cm) to ensure it's lifted perfectly on the floor
+            // Centre model above ground with 30cm lift
             var yOffset = ((-box.min.y) * scaleFactor) + 0.30;
             el.setAttribute('position', '0 ' + yOffset + ' 0');
 
-            // Shrink inner geometry to near-zero first, then animate up
+            // Animate in
             el.setAttribute('scale', '0.001 0.001 0.001');
             el.setAttribute('animation', {
               property: 'scale',
