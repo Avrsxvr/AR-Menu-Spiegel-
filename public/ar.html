@@ -397,7 +397,7 @@
     // ── More Aggressive Slam-Grid Killer ─────────────
     AFRAME.registerComponent('slam-grid-killer', {
       init: function() {
-        this.el.addEventListener('realityready', () => {
+        const killGrid = () => {
           // Kill any slam-grid entity that might have been injected
           const grids = document.querySelectorAll('[xrextras-slam-grid], #slam-grid, .xrextras-slam-grid');
           grids.forEach(g => {
@@ -410,10 +410,19 @@
             scene.object3D.traverse((obj) => {
               if (obj.name && obj.name.toLowerCase().includes('slam-grid')) {
                 obj.visible = false;
+                if (obj.material) {
+                  obj.material.visible = false;
+                  obj.material.opacity = 0;
+                }
               }
             });
           }
-        });
+        };
+
+        this.el.addEventListener('realityready', killGrid);
+        
+        // Repeatedly kill it in case 8th Wall re-injects it asynchronously
+        setInterval(killGrid, 100);
       }
     });
 
@@ -551,8 +560,8 @@
             var maxDim = Math.max(size.x, size.y, size.z);
 
             if (maxDim > 0.001) {
-              // Increased target size by 1.5x (1.25 * 1.5 = 1.875)
-              var targetSize = 1.875;
+              // Target size reduced by 30% from 1.3125 to 0.91875
+              var targetSize = 0.91875;
               scaleFactor = targetSize / maxDim;
             } else {
               scaleFactor = 0.01;
