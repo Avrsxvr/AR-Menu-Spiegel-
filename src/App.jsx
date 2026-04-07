@@ -100,6 +100,25 @@ function App() {
         const data = await response.json();
         setDishes(data);
         
+        // 🧊 Expert Optimization: Silent Background Warm-up for AR
+        if (data && data.length > 0) {
+          setTimeout(() => {
+            console.log('🧊 App: Warming up AR engine in background...');
+            const prefetchUrls = [
+              '/ar.html',
+              '/external/xr/xr.js',
+              '/external/xr/xr-slam.js'
+            ];
+            
+            // Only precompute the first 3 models to save initial data
+            const initialModels = data.slice(0, 3).map(d => d.modelUrl).filter(Boolean);
+            
+            [...prefetchUrls, ...initialModels].forEach(url => {
+              fetch(url, { mode: 'no-cors' }).catch(() => {});
+            });
+          }, 2000); // Wait 2 seconds so we don't interfere with initial page render
+        }
+
         // Track successful data load
         trackEvent('dishes_loaded', {
           total_dishes: data?.length || 0,

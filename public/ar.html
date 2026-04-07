@@ -16,7 +16,6 @@
   <!-- 8th Wall Engine Stack -->
   <script src="//cdn.8thwall.com/web/aframe/8frame-1.5.0.min.js"></script>
   <script src="//cdn.8thwall.com/web/xrextras/xrextras.js"></script>
-  <script src="//cdn.8thwall.com/web/landing-page/landing-page.js"></script>
   
   <!-- Core SLAM Engine - High priority for faster camera opening -->
   <script src="/external/xr/xr.js" async data-preload-chunks="slam" fetchpriority="high"></script>
@@ -343,6 +342,14 @@
       0% { transform: rotate(0deg); } 
       100% { transform: rotate(360deg); } 
     }
+    /* ── Hide 8th Wall Slam Grid (Diagonal Stripes) ────────── */
+    #slam-grid, 
+    .xrextras-slam-grid,
+    a-entity[xrextras-slam-grid] {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
   </style>
 </head>
 
@@ -564,8 +571,6 @@
   <!-- ── A-Frame scene with 8th Wall world tracking ──── -->
   <a-scene
     tap-place-dish
-    landing-page
-    xrextras-loading
     xrextras-runtime-error
     xrextras-gesture-detector
     renderer="colorManagement: true"
