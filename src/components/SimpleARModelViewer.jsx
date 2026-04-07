@@ -94,7 +94,12 @@ const SimpleARModelViewer = ({
   }
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div 
+      style={{ width: '100%', height: '100%', position: 'relative' }}
+      onPointerDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
       {/* Loading overlay */}
       {isLoading && (
         <div 

@@ -5,12 +5,16 @@ import VegNonVegBadge from './VegNonVegBadge';
 const DishCard = ({ dish, onViewModal, adaptiveSettings, activeModelId, onActivateModel }) => {
   const isModelActive = activeModelId === dish.id;
 
-  const handlePreviewTap = () => {
-    if (isModelActive) {
-      // Already active → deactivate (go back to image)
-      onActivateModel(null);
-    } else {
-      // Activate this card's 3D model (deactivates any other)
+  const handlePreviewTap = (e) => {
+    if (e) e.stopPropagation();
+    // Activate this card's 3D model if not already active
+    if (!isModelActive && dish.modelUrl) {
+      onActivateModel(dish.id);
+    }
+  };
+
+  const handleInteractionStart = () => {
+    if (!isModelActive && dish.modelUrl) {
       onActivateModel(dish.id);
     }
   };
@@ -43,9 +47,10 @@ const DishCard = ({ dish, onViewModal, adaptiveSettings, activeModelId, onActiva
         cursor: 'default'
       }}
     >
-      {/* Preview area — image by default, 3D model on tap */}
+      {/* Preview area — image by default, 3D model on tap or drag */}
       <div
         className="relative mb-4 overflow-hidden rounded-2xl aspect-[4/3] flex-shrink-0"
+        onPointerDown={handleInteractionStart}
         onClick={dish.modelUrl ? handlePreviewTap : undefined}
         style={{ cursor: dish.modelUrl ? 'pointer' : 'default' }}
       >
@@ -57,7 +62,7 @@ const DishCard = ({ dish, onViewModal, adaptiveSettings, activeModelId, onActiva
               dishName={dish.name}
               className="rounded-2xl"
             />
-            {/* Close 3D badge */}
+            {/* Active 3D badge */}
             <div
               style={{
                 position: 'absolute',
@@ -76,20 +81,20 @@ const DishCard = ({ dish, onViewModal, adaptiveSettings, activeModelId, onActiva
                 border: '1px solid rgba(255,255,255,0.12)'
               }}
             >
-              ✕ Tap to close 3D
+              🧊 3D Active
             </div>
           </>
         ) : (
           /* ── Dish image (lightweight default) ── */
           <>
             <img
-              src={dish.image}
+              src={dish.posterImage || dish.image}
               alt={dish.name}
               loading="lazy"
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
+                objectFit: dish.posterImage ? 'contain' : 'cover',
                 display: 'block',
                 borderRadius: '12px',
                 backgroundColor: '#2a2a2a'

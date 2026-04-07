@@ -5,17 +5,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Spiegel AR – View on Table</title>
+  <link rel="icon" type="image/png" href="/fav.png" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- 8th Wall Engine Stack (self-hosted) -->
-  <script src="/8thwall/scripts/8frame-1.5.0.min.js"></script>
-  <script src="/8thwall/xrextras/xrextras.js"></script>
-  <script src="/8thwall/landing-page/landing-page.js"></script>
-  <script src="/8thwall/xr/xr.js" async data-preload-chunks="slam"></script>
+  <!-- 8th Wall Engine Stack -->
+  <!-- We use the CDN for the generic UI libraries to perfectly resolve all SVG/Font paths automatically -->
+  <script src="//cdn.8thwall.com/web/aframe/8frame-1.5.0.min.js"></script>
+  <script src="//cdn.8thwall.com/web/xrextras/xrextras.js"></script>
+  <script src="//cdn.8thwall.com/web/landing-page/landing-page.js"></script>
+  
+  <!-- Core SLAM Engine (Self-hosted to bypass domain/license locks) -->
+  <script src="/external/xr/xr.js" async data-preload-chunks="slam"></script>
 
   <style>
     * {
@@ -275,13 +279,34 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* ── Desktop Preview Styles ────────────────────────── */
-    #desktop-env {
-      display: none;
-    }
-
-    body.display-desktop-env #desktop-env {
-      display: block;
+    /* ── Hide 8th Wall Branding Completely ────────────────────────── */
+    #poweredby,
+    .poweredby-8thwall,
+    #poweredby-8thwall,
+    .poweredby-container,
+    #watermark,
+    .watermark,
+    #load-logo,
+    .xrextras-poweredby-container,
+    #poweredbyspacer,
+    .xrextras-logo-container,
+    .xrextras-loading-logo,
+    .xrextras-loading-poweredby,
+    #loadImage, 
+    #landingPageLogo,
+    .xr-logo,
+    .xrextras-logo,
+    .xrextras-loading-logo-container img,
+    img[src*="8thwall"],
+    svg[class*="8thwall"],
+    .a-enter-vr, 
+    .a-enter-ar {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      width: 0 !important;
+      height: 0 !important;
+      pointer-events: none !important;
     }
   </style>
 </head>
@@ -306,7 +331,7 @@
       <span>↻</span> Reset
     </button>
     <button class="ar-action-btn" id="doneBtn">
-      <span>✓</span> Done
+      <span>📋</span> Menu
     </button>
   </div>
 
@@ -338,8 +363,28 @@
 
     // Detect if on Desktop for visual preview
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // If on desktop, we dynamically add the artificial floor and sky so you can preview the model
     if (!isMobile) {
-      document.body.classList.add('display-desktop-env');
+      window.addEventListener('DOMContentLoaded', () => {
+        const sceneEl = document.querySelector('a-scene');
+        if (sceneEl) {
+          sceneEl.addEventListener('loaded', () => {
+            const envEl = document.createElement('a-entity');
+            envEl.innerHTML = `
+              <a-sky color="#1a1a1a"></a-sky>
+              <a-circle rotation="-90 0 0" radius="100" color="#333" metalness="0" roughness="1"></a-circle>
+            `;
+            sceneEl.appendChild(envEl);
+
+            // Move camera back to see the environment on desktop
+            const camera = document.getElementById('camera');
+            if (camera) {
+              camera.setAttribute('position', '0 8 8');
+            }
+          });
+        }
+      });
     }
 
     // ── Back / Done buttons ────────────────────────────
@@ -351,7 +396,10 @@
     });
 
     // ── Helper: show toast ─────────────────────────────
+    var hasShownToast = false;
     function showPlacedToast() {
+      if (hasShownToast) return;
+      hasShownToast = true;
       var toast = document.getElementById('placedToast');
       toast.classList.add('show');
       setTimeout(function () {
@@ -386,57 +434,60 @@
           isModelLoading = true;
           prompt.classList.add('hidden');
 
-          var el = document.createElement('a-entity');
-          el.setAttribute('position', touchPoint);
-          el.setAttribute('visible', 'false');
-          el.setAttribute('scale', '0.0001 0.0001 0.0001');
-          el.setAttribute('shadow', 'receive: false');
+          // ── Create Wrapper Entity (Handles all touching/gestures) ──
+          var wrapper = document.createElement('a-entity');
+          wrapper.setAttribute('position', touchPoint);
+          wrapper.classList.add('cantap'); // MUST be on the wrapper so hold-drag catches the raycast!
+          
+          // Gesture components always operate on a clean 1.0 baseline
+          wrapper.setAttribute('xrextras-two-finger-rotate', '');
+          wrapper.setAttribute('xrextras-pinch-scale', 'min: 0.1; max: 8.0');
+          wrapper.setAttribute('xrextras-hold-drag', '');
 
-          // Enable gestures on this new model
-          el.classList.add('cantap');
-          el.setAttribute('xrextras-two-finger-rotate', '');
-          el.setAttribute('xrextras-pinch-scale', '');
-          el.setAttribute('xrextras-hold-drag', '');
+          // ── Create Inner Entity (Handles geometry and scaling math) ──
+          var el = document.createElement('a-entity');
+          el.setAttribute('shadow', 'receive: false');
+          el.setAttribute('scale', '1 1 1'); // start at 1 for measuring truly
 
           // Use the model URL directly (encodeURI handles spaces)
           el.setAttribute('gltf-model', encodeURI(modelUrl));
 
-          self.el.sceneEl.appendChild(el);
-          currentModel = el;
+          wrapper.appendChild(el);
+          self.el.sceneEl.appendChild(wrapper);
+          
+          // Save wrapper to logic variables so Reset deletes both
+          currentModel = wrapper;
 
           el.addEventListener('model-loaded', function () {
             isModelLoading = false;
 
-            // ── Auto-scale to real-world plate size (~22 cm) ──────
-            // Use el.object3D to ensure we capture all child meshes, not just the root
+            // Ensure model is updated for measurement
+            el.object3D.updateWorldMatrix(true, true);
+            
+            // ── Measure REAL bounding box at scale 1 ──────
             var box = new THREE.Box3().setFromObject(el.object3D);
             var size = new THREE.Vector3();
             box.getSize(size);
-            
+
             var scaleFactor = 1;
-            // Get the absolute maximum dimension (just in case x/z are reported as 0)
+            // Use the largest dimension to normalise
             var maxDim = Math.max(size.x, size.y, size.z);
-            
+
             if (maxDim > 0.001) {
-              var targetSize = 0.22; // 22 centimeters
+              // Increased initial placement size by 10x as requested (10 meters relative baseline)
+              var targetSize = 10.0;
               scaleFactor = targetSize / maxDim;
             } else {
-              // Fallback if model bounding box is completely broken or empty
-              scaleFactor = 0.1;
+              scaleFactor = 0.01; // safe tiny fallback
             }
 
-            // Centre model above ground
-            var center = new THREE.Vector3();
-            box.getCenter(center);
-            var yOffset = (-box.min.y) * scaleFactor;
-            var pos = el.getAttribute('position');
-            el.setAttribute('position', {
-              x: pos.x,
-              y: pos.y + yOffset,
-              z: pos.z
-            });
+            // Centre model above ground locally inside the wrapper
+            // Add a 0.30 offset (30cm) to ensure it's lifted perfectly on the floor
+            var yOffset = ((-box.min.y) * scaleFactor) + 0.30;
+            el.setAttribute('position', '0 ' + yOffset + ' 0');
 
-            el.setAttribute('visible', 'true');
+            // Shrink inner geometry to near-zero first, then animate up
+            el.setAttribute('scale', '0.001 0.001 0.001');
             el.setAttribute('animation', {
               property: 'scale',
               to: scaleFactor + ' ' + scaleFactor + ' ' + scaleFactor,
@@ -477,7 +528,7 @@
     <!-- Camera + raycaster -->
     <a-camera
       id="camera"
-      position="0 8 8"
+      position="0 1.6 0"
       raycaster="objects: .cantap"
       cursor="fuse: false; rayOrigin: mouse;">
     </a-camera>
@@ -501,19 +552,6 @@
     </a-entity>
 
     <a-light type="ambient" intensity="0.6"></a-light>
-
-    <!-- Desktop Preview Environment (Only visible on Windows/Mac) -->
-    <a-entity id="desktop-env">
-      <a-sky color="#1a1a1a"></a-sky>
-      <!-- Visual ground for desktop testing -->
-      <a-circle
-        rotation="-90 0 0"
-        radius="100"
-        color="#333"
-        metalness="0"
-        roughness="1"
-      ></a-circle>
-    </a-entity>
 
     <!-- Invisible ground plane for tap raycasting -->
     <a-box

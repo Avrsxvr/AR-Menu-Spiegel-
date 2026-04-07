@@ -8,7 +8,8 @@
     "price": 350,
     "type": "non-veg",
     "image": "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&h=300&fit=crop&crop=center",
-    "modelUrl": "/Models/Bong Kebab.glb"
+    "modelUrl": "/Models/Bong Kebab.glb",
+    "posterImage": "/Images/posters/bong-kebab.png"
   },
   {
     "id": "Phool-til-posto",
@@ -19,7 +20,8 @@
     "price": 270,
     "type": "veg",
     "image": "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&h=300&fit=crop&crop=center",
-    "modelUrl": "/Models/Fool_Til_Posto.glb"
+    "modelUrl": "/Models/Fool_Til_Posto.glb",
+    "posterImage": "/Images/posters/phool-til-posto.png"
   },
   {
     "id": "nonibahar-redefined",
@@ -30,7 +32,8 @@
     "price": 390,
     "type": "non-veg",
     "image": "https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=400&h=300&fit=crop&crop=center",
-    "modelUrl": "/Models/Nonibahar redefined.glb"
+    "modelUrl": "/Models/Nonibahar redefined.glb",
+    "posterImage": "/Images/posters/nonibahar-redefined.png"
   },
   {
     "id": "aamchur-golda",
@@ -41,7 +44,8 @@
     "price": 390,
     "type": "non-veg",
     "image": "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop&crop=center",
-    "modelUrl": "/Models/Aamchur Golda.glb"
+    "modelUrl": "/Models/Aamchur Golda.glb",
+    "posterImage": "/Images/posters/aamchur-golda.png"
   },
   {
     "id": "jhuri-mourola",
@@ -52,7 +56,8 @@
     "price": 130,
     "type": "non-veg",
     "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop&crop=center",
-    "modelUrl": "/Models/Jhuri_Mourola.glb"
+    "modelUrl": "/Models/Jhuri_Mourola.glb",
+    "posterImage": "/Images/posters/jhuri-mourola.png"
   },
   {
     "id": "til-aamra-murgi",
@@ -63,7 +68,8 @@
     "price": 295,
     "type": "non-veg",
     "image": "https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=400&h=300&fit=crop&crop=center",
-    "modelUrl": "/Models/Til Amra Murgi.glb"
+    "modelUrl": "/Models/Til Amra Murgi.glb",
+    "posterImage": "/Images/posters/til-aamra-murgi.png"
   },
   {
     "id": "gorgora",
@@ -74,7 +80,8 @@
     "price": 450,
     "type": "non-veg",
     "image": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=300&fit=crop&crop=center",
-    "modelUrl": "/Models/Gorgora.glb"
+    "modelUrl": "/Models/Gorgora.glb",
+    "posterImage": "/Images/posters/gorgora.png"
   },
   {
     "id": "golda-amok",
@@ -85,7 +92,8 @@
     "price": 390,
     "type": "non-veg",
     "image": "https://images.unsplash.com/photo-1631709497146-d4782b17ee3e?w=400&h=300&fit=crop&crop=center",
-    "modelUrl": "/Models/Golda_Amok.glb"
+    "modelUrl": "/Models/Golda_Amok.glb",
+    "posterImage": "/Images/posters/golda-amok.png"
   },
   {
     "id": "bhaja-twist",
@@ -96,7 +104,8 @@
     "price": 220,
     "type": "non-veg",
     "image": "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&h=300&fit=crop&crop=center",
-    "modelUrl": "/Models/Bhaja twist.glb"
+    "modelUrl": "/Models/Bhaja twist.glb",
+    "posterImage": "/Images/posters/bhaja-twist.png"
   },
   {
     "id": "kachhi-mirchi",
@@ -107,7 +116,8 @@
     "price": 210,
     "type": "non-veg",
     "image": "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&h=300&fit=crop&crop=center",
-    "modelUrl": "/Models/Kachhi Mirchi.glb"
+    "modelUrl": "/Models/Kachhi Mirchi.glb",
+    "posterImage": "/Images/posters/kachhi-mirchi.png"
   },
   {
     "id": "kolkata-yakhni-polao",
@@ -129,7 +139,8 @@
     "price": 180,
     "type": "veg",
     "image": "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&h=300&fit=crop&crop=center",
-    "modelUrl": "/Models/Anarosh Sona Moong.glb"
+    "modelUrl": "/Models/Anarosh Sona Moong.glb",
+    "posterImage": "/Images/posters/anarosh-sona-moong.png"
   },
   {
     "id": "mollar-chowk-doi-biski",
@@ -140,6 +151,7 @@
     "price": 145,
     "type": "veg",
     "image": "https://images.unsplash.com/photo-1571167489217-33e4be702324?w=400&h=300&fit=crop&crop=center",
-    "modelUrl": "/Models/mollar chowk doi with Biski.glb"
+    "modelUrl": "/Models/mollar chowk doi with Biski.glb",
+    "posterImage": "/Images/posters/mollar-chowk-doi-with-biski.png"
   }
 ]
