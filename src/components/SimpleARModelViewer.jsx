@@ -8,6 +8,7 @@ import React, { useEffect, useRef, useState } from 'react';
 const SimpleARModelViewer = ({ 
   modelSrc, 
   dishName, 
+  poster,
   className = "",
   style = {}
 }) => {
@@ -75,12 +76,9 @@ const SimpleARModelViewer = ({
     });
 
     return () => {
-      clearTimeout(fallbackTimeout);
       if (modelViewer) {
         modelViewer.removeEventListener('load', handleLoad);
         modelViewer.removeEventListener('error', handleError);
-        modelViewer.removeEventListener('model-visibility', handleModelReady);
-        modelViewer.removeEventListener('progress', handleModelReady);
       }
     };
   }, [modelSrc, dishName]);
@@ -95,49 +93,16 @@ const SimpleARModelViewer = ({
 
   return (
     <div 
-      style={{ width: '100%', height: '100%', position: 'relative' }}
+      style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', borderRadius: 'inherit' }}
       onPointerDown={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Loading overlay */}
-      {isLoading && (
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.45)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-            color: '#ffffff',
-            zIndex: 10,
-            borderRadius: '16px'
-          }}
-        >
-          <div className="spiegel-spinner-mini" style={{
-            width: '24px',
-            height: '24px',
-            border: '3px solid rgba(255,255,255,0.1)',
-            borderLeftColor: '#ffffff',
-            borderRadius: '50%',
-            animation: 'spin 0.8s linear infinite',
-            marginBottom: '12px'
-          }}></div>
-          <span style={{ fontSize: '12px', fontWeight: '600', letterSpacing: '0.02em' }}>Loading 3D...</span>
-        </div>
-      )}
-      
-      {/* 3D preview only – no AR attributes */}
+      {/* 3D preview with seamless poster transition */}
       <model-viewer
         ref={modelViewerRef}
         src={modelSrc ? encodeURI(modelSrc) : ''}
+        poster={poster || ''}
         alt={`3D ${dishName} Model`}
         camera-controls
         interaction-policy="always-allow"
@@ -149,25 +114,51 @@ const SimpleARModelViewer = ({
         rotation-per-second="30deg"
         bounds="tight"
         camera-target="auto auto auto"
-        loading="lazy"
+        loading="eager"
         reveal="auto"
-        max-pixel-ratio="1"
         seamless-poster
         interaction-prompt="none"
-        shadow-intensity="0.5"
+        shadow-intensity="1"
         shadow-softness="1"
         tone-mapping="neutral"
         environment-image="neutral"
-        exposure="0.8"
+        exposure="1"
         style={{
           width: '100%',
           height: '100%',
           display: 'block',
           backgroundColor: '#2a2a2a',
-          borderRadius: '12px',
+          cursor: 'grab',
           ...style
         }}
       >
+        <div slot="progress-bar" style={{ display: 'none' }}></div>
+        
+        {isLoading && (
+          <div 
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              pointerEvents: 'none',
+              zIndex: 10
+            }}
+          >
+            <div className="spiegel-spinner-mini" style={{
+              width: '24px',
+              height: '24px',
+              border: '3px solid rgba(255,255,255,0.1)',
+              borderLeftColor: '#ffffff',
+              borderRadius: '50%',
+              animation: 'spin 0.8s linear infinite',
+            }}></div>
+          </div>
+        )}
       </model-viewer>
     </div>
   );

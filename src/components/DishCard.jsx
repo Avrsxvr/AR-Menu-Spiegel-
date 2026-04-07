@@ -60,6 +60,7 @@ const DishCard = ({ dish, onViewModal, adaptiveSettings, activeModelId, onActiva
             <SimpleARModelViewer
               modelSrc={dish.modelUrl}
               dishName={dish.name}
+              poster={dish.posterImage || dish.image}
               className="rounded-2xl"
             />
             {/* Active 3D badge */}
