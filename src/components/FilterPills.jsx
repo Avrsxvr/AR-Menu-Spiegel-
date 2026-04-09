@@ -1,7 +1,7 @@
 import React from 'react';
 
-const FilterPills = ({ categories, activeCategory, onCategoryChange }) => {
-  const allCategories = ['All', ...categories];
+const FilterPills = ({ activeCategory, onCategoryChange }) => {
+  const mainCategories = ['MENU', "Chef's Special"];
 
   return (
     <div 
@@ -13,26 +13,23 @@ const FilterPills = ({ categories, activeCategory, onCategoryChange }) => {
       }}
     >
       <div className="max-w-7xl mx-auto">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-          {allCategories.map((category) => (
+        <div className="flex gap-4 justify-center">
+          {mainCategories.map((category) => (
             <button
               key={category}
               onClick={() => onCategoryChange(category)}
               className={`
-                flex-shrink-0 px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 focus-visible
-                min-h-[44px] flex items-center justify-center
+                flex-shrink-0 px-8 py-2 rounded-full text-sm font-semibold tracking-widest transition-all duration-300
+                min-h-[48px] flex items-center justify-center uppercase
                 ${activeCategory === category 
-                  ? 'text-white shadow-md' 
-                  : 'text-var(--text-secondary) hover:text-var(--text-primary)'
+                  ? 'text-white shadow-[0_0_20px_rgba(220,38,38,0.3)]' 
+                  : 'text-var(--text-secondary) hover:text-white border border-white/10'
                 }
               `}
               style={{
                 backgroundColor: activeCategory === category 
                   ? 'var(--accent)' 
-                  : 'var(--card-bg)',
-                color: activeCategory === category 
-                  ? 'white' 
-                  : 'var(--text-secondary)'
+                  : 'rgba(255,255,255,0.03)',
               }}
               aria-pressed={activeCategory === category}
             >
