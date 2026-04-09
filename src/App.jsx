@@ -15,7 +15,7 @@ import { getAdaptiveSettings, performanceMonitor } from './utils/DeviceOptimizat
 function App() {
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState('MENU');
+  const [activeCategory, setActiveCategory] = useState("Chef's Special");
   const [searchTerm, setSearchTerm] = useState('');
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -207,7 +207,7 @@ function App() {
           
           {/* Category Tabs */}
           <div className="flex items-center justify-center gap-8 overflow-x-auto scrollbar-hide">
-            {['MENU', "Chef's Special"].map(cat => (
+            {["Chef's Special", 'MENU'].map(cat => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
