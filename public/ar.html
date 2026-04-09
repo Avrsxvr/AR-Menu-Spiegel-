@@ -328,6 +328,54 @@
       opacity: 0;
       pointer-events: none;
     }
+    .spiegel-start-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(30, 30, 30, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px 32px;
+      text-align: center;
+      max-width: 320px;
+      width: 90%;
+    }
+    .spiegel-start-box h2 {
+      color: #fff;
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    .spiegel-start-box p {
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .spiegel-btn-primary {
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      padding: 16px 36px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      width: 100%;
+    }
+    .spiegel-btn-primary:active {
+      background: #dc2626;
+      transform: scale(0.98);
+    }
+    .spiegel-load-box {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
     .spiegel-spinner {
       width: 48px;
       height: 48px;
@@ -362,8 +410,20 @@
 
   <!-- ── Custom Loading Overlay ─────────────────────── -->
   <div id="spiegel-loader" class="spiegel-loader-overlay">
-    <div class="spiegel-spinner"></div>
-    <div class="spiegel-loading-text">Preparing AR Menu...</div>
+    
+    <!-- Step 1: Start UI (Requires Interaction) -->
+    <div id="spiegel-start-box" class="spiegel-start-box">
+      <h2>SPIEGEL AR</h2>
+      <p>We need access to your camera and motion sensors to display dishes on your table.</p>
+      <button id="startArBtn" class="spiegel-btn-primary">Launch AR Experience</button>
+    </div>
+
+    <!-- Step 2: Native Loading Spinner (After Interaction) -->
+    <div id="spiegel-load-box" class="spiegel-load-box">
+      <div class="spiegel-spinner"></div>
+      <div class="spiegel-loading-text">Preparing AR Menu...</div>
+    </div>
+
   </div>
 
   <!-- ── UI Overlay ──────────────────────────────────── -->
@@ -442,17 +502,76 @@
       }
     });
 
-    // ── Hide Custom Loader when AR starts ──────────────
-    document.addEventListener('DOMContentLoaded', function() {
-      var sceneEl = document.querySelector('a-scene');
-      var fallbackTimer = setTimeout(function() {
-        if (!window.arReady) {
-           document.getElementById('spiegel-loader').classList.add('hidden');
-           document.getElementById('fallbackPanel').classList.add('visible');
-        }
-      }, 10000); // 10s wait before showing fallback option
+    // ── Pre-read info ──────────────────────────────────
+    var params = new URLSearchParams(window.location.search);
+    var modelUrl = params.get('model') || '';
+    var dishName = params.get('name') || 'Dish';
 
-      if (sceneEl) {
+    // Set badge text & UI state on load
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('dishBadge').textContent = dishName;
+
+      // Show error if no model
+      if (!modelUrl) {
+        document.getElementById('errorPanel').classList.add('visible');
+        document.getElementById('promptText').classList.add('hidden');
+        document.getElementById('spiegel-loader').classList.add('hidden');
+      }
+    });
+
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    // ── Interaction Bridge (Fixes iOS Safari Permissions) ──────────────
+    document.addEventListener('DOMContentLoaded', function() {
+      var startBtn = document.getElementById('startArBtn');
+      var startBox = document.getElementById('spiegel-start-box');
+      var loadBox = document.getElementById('spiegel-load-box');
+
+      if (!startBtn) return;
+
+      startBtn.addEventListener('click', function () {
+        // iOS 13+ requires user tap explicitly to request DeviceMotion permission 
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+          DeviceMotionEvent.requestPermission()
+            .then(function (permissionState) {
+              if (permissionState === 'granted') {
+                startAR();
+              } else {
+                alert("Motion sensors are required for AR to work. Please navigate to settings and allow motion access.");
+              }
+            })
+            .catch(function (error) {
+              console.error("DeviceMotion Error:", error);
+              startAR(); // Fallback in case of weird browser behaviors
+            });
+        } else {
+          // Android, Desktop, or older models where requestPermission doesn't exist
+          startAR();
+        }
+      });
+
+      function startAR() {
+        if (!modelUrl) return;
+
+        // 1. Swap UI to the standard loading spinner
+        startBox.style.display = 'none';
+        loadBox.style.display = 'flex';
+
+        // 2. Inject the deeply sleeping <a-scene> into DOM so A-Frame initializes properly inside the user flow
+        var template = document.getElementById('scene-template');
+        document.body.appendChild(template.content.cloneNode(true));
+        
+        var sceneEl = document.querySelector('a-scene');
+
+        // 3. Set a fallback timer for AR readiness (generous 15s delay post-tap)
+        var fallbackTimer = setTimeout(function() {
+          if (!window.arReady) {
+             document.getElementById('spiegel-loader').classList.add('hidden');
+             document.getElementById('fallbackPanel').classList.add('visible');
+          }
+        }, 15000); 
+
+        // 4. When 8th Wall SLAM is fully active
         sceneEl.addEventListener('realityready', function() {
           window.arReady = true;
           clearTimeout(fallbackTimer);
@@ -462,31 +581,9 @@
             setTimeout(function() { loader.remove(); }, 500);
           }
         });
-      }
-    });
 
-    // ── Read query params ──────────────────────────────
-    var params = new URLSearchParams(window.location.search);
-    var modelUrl = params.get('model') || '';
-    var dishName = params.get('name') || 'Dish';
-
-    // Set badge text
-    document.getElementById('dishBadge').textContent = dishName;
-
-    // Show error if no model
-    if (!modelUrl) {
-      document.getElementById('errorPanel').classList.add('visible');
-      document.getElementById('promptText').classList.add('hidden');
-    }
-
-    // Detect if on Desktop for visual preview
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    // If on desktop, we dynamically add the artificial floor and sky so you can preview the model
-    if (!isMobile) {
-      window.addEventListener('DOMContentLoaded', () => {
-        const sceneEl = document.querySelector('a-scene');
-        if (sceneEl) {
+        // 5. Desktop-specific visual preview
+        if (!isMobile) {
           sceneEl.addEventListener('loaded', () => {
             const envEl = document.createElement('a-entity');
             envEl.innerHTML = `
@@ -495,15 +592,14 @@
             `;
             sceneEl.appendChild(envEl);
 
-            // Move camera back to see the environment on desktop
             const camera = document.getElementById('camera');
             if (camera) {
               camera.setAttribute('position', '0 8 8');
             }
           });
         }
-      });
-    }
+      }
+    });
 
     // ── Back / Done buttons ────────────────────────────
     document.getElementById('backBtn').addEventListener('click', function () {
@@ -632,54 +728,56 @@
     });
   </script>
 
-  <!-- ── A-Frame scene with 8th Wall world tracking ──── -->
-  <a-scene
-    tap-place-dish
-    slam-grid-killer
-    xrextras-runtime-error
-    xrextras-gesture-detector
-    renderer="colorManagement: true"
-    xrweb="allowedDevices: any; disableStandardSLAMIntro: true; skipAppIntro: true; requestPresence: false; coachingOverlay: false; disableTrackingPlane: true; disableCoachingOverlay: true; disableFeaturePoints: true">
+  <!-- ── A-Frame scene Template (Attached via Interaction) ──── -->
+  <template id="scene-template">
+    <a-scene
+      tap-place-dish
+      slam-grid-killer
+      xrextras-runtime-error
+      xrextras-gesture-detector
+      renderer="colorManagement: true"
+      xrweb="allowedDevices: any; disableStandardSLAMIntro: true; skipAppIntro: true; requestPresence: false; coachingOverlay: false; disableTrackingPlane: true; disableCoachingOverlay: true; disableFeaturePoints: true">
 
-    <!-- Camera + raycaster -->
-    <a-camera
-      id="camera"
-      position="0 1.6 0"
-      raycaster="objects: .cantap"
-      cursor="fuse: false; rayOrigin: mouse;">
-    </a-camera>
+      <!-- Camera + raycaster -->
+      <a-camera
+        id="camera"
+        position="0 1.6 0"
+        raycaster="objects: .cantap"
+        cursor="fuse: false; rayOrigin: mouse;">
+      </a-camera>
 
-    <!-- Directional light (follows camera) -->
-    <a-entity
-      light="
-        type: directional;
-        intensity: 0.8;
-        castShadow: true;
-        shadowMapHeight: 2048;
-        shadowMapWidth: 2048;
-        shadowCameraTop: 20;
-        shadowCameraBottom: -20;
-        shadowCameraRight: 20;
-        shadowCameraLeft: -20;
-        target: #camera"
-      xrextras-attach="target: camera; offset: 4 10 3"
-      position="1 4.3 2.5"
-      shadow>
-    </a-entity>
+      <!-- Directional light (follows camera) -->
+      <a-entity
+        light="
+          type: directional;
+          intensity: 0.8;
+          castShadow: true;
+          shadowMapHeight: 2048;
+          shadowMapWidth: 2048;
+          shadowCameraTop: 20;
+          shadowCameraBottom: -20;
+          shadowCameraRight: 20;
+          shadowCameraLeft: -20;
+          target: #camera"
+        xrextras-attach="target: camera; offset: 4 10 3"
+        position="1 4.3 2.5"
+        shadow>
+      </a-entity>
 
-    <a-light type="ambient" intensity="0.6"></a-light>
+      <a-light type="ambient" intensity="0.6"></a-light>
 
-    <!-- Invisible ground plane for tap raycasting -->
-    <a-box
-      id="ground"
-      class="cantap"
-      scale="1000 0.01 1000"
-      position="0 0 0"
-      material="shader: shadow; transparent: true; opacity: 0.4"
-      shadow>
-    </a-box>
+      <!-- Invisible ground plane for tap raycasting -->
+      <a-box
+        id="ground"
+        class="cantap"
+        scale="1000 0.01 1000"
+        position="0 0 0"
+        material="shader: shadow; transparent: true; opacity: 0.4"
+        shadow>
+      </a-box>
 
-  </a-scene>
+    </a-scene>
+  </template>
 
 
 </body>
